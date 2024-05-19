@@ -1,0 +1,21 @@
+@use "sass:math";
+@use "variables" as variables;
+//こちらに使用するfunctionを格納してください。
+@function per-num($value) {
+  @return percentage(($value / 375px) / 2);
+}
+
+@function calcPc($value) {
+  @return math.div($value, 750) * variables.$pc_wrapper;
+}
+
+@function calcSp($value) {
+  @return #{math.div($value, 750) * 100}vw;
+}
+
+@function stripUnit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return math.div($number, ($number * 0 + 1));
+  }
+  @return $number;
+}

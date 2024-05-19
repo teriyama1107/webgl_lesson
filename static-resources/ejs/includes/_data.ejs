@@ -1,0 +1,15 @@
+<% 
+params.assets_path = '/assets/';
+params.css_path    = params.assets_path + 'css/';
+params.js_path     = params.assets_path + 'js/';
+params.img_path    = params.assets_path + 'img/';
+var D = new Date();
+DY = D.getFullYear() + '';
+DM = ((D.getMonth()+1) < 10)?'0' + (D.getMonth()+1):(D.getMonth()+1)+'';
+DD = (D.getDate() < 10)?'0' + D.getDate():D.getDate()+'';
+Dh = (D.getHours() < 10)?'0' + D.getHours():D.getHours()+'';
+Dm = (D.getMinutes() < 10)?'0' + D.getMinutes():D.getMinutes()+'';
+Ds = (D.getSeconds() < 10)?'0' + D.getSeconds():D.getSeconds()+'';
+params.cache_busting_str = DY + DM + DD + Dh + Dm + Ds;
+params.login = false;
+%>

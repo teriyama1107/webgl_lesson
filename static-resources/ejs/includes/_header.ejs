@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja" prefix="og: http://ogp.me/ns#">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="<%= params.page_description %>">
+<title><%= params.page_title %></title>
+<meta property="og:site_name" content="<%= params.page_title %>">
+<meta property="og:type" content="website">
+<meta property="og:url" content="<%= params.page_url %>">
+<meta property="og:title" content="<%= params.page_title %>">
+<meta property="og:description" content="<%= params.page_description %>"/>
+<meta property="og:image" content="<%= params.img_path %>OGP.png"/>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= params.page_title %>">
+<meta name="twitter:description" content="<%= params.page_description %>"/>
+<meta name="twitter:image" content="<%= params.img_path %>OGP.png" />
+<link rel="icon" href="<%= params.img_path %>favicon.ico" />
+<link rel="stylesheet" href="<%= params.css_path %>style.css?<%= params.cache_busting_str %>">
+</head>
+<body class="<%= params.body_class %>">
