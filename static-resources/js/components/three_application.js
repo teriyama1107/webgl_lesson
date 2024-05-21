@@ -15,7 +15,7 @@ class ThreeApp {
     // 描画する空間のファークリップ面（最遠面）
     far: 20.0,
     // カメラの座標
-    position: new THREE.Vector3(0.0, 2.0, 10.0),
+    position: new THREE.Vector3(0.0, 1.0, 1.0),
     // カメラの注視点
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
@@ -23,7 +23,7 @@ class ThreeApp {
    * レンダラー定義のための定数
    */
   static RENDERER_PARAM = {
-    clearColor: 0x666666,       // 画面をクリアする色
+    clearColor: 0x000000,       // 画面をクリアする色
     width: window.innerWidth,   // レンダラーに設定する幅
     height: window.innerHeight, // レンダラーに設定する高さ
   };
@@ -31,8 +31,8 @@ class ThreeApp {
    * 平行光源定義のための定数
    */
   static DIRECTIONAL_LIGHT_PARAM = {
-    color: 0xffffff,                            // 光の色
-    intensity: 1.0,                             // 光の強度
+    color: 0x000000,                            // 光の色
+    intensity: 4.0,                             // 光の強度
     position: new THREE.Vector3(1.0, 1.0, 1.0), // 光の向き
   };
   /**
@@ -55,8 +55,7 @@ class ThreeApp {
   directionalLight; // 平行光源（ディレクショナルライト）
   ambientLight;     // 環境光（アンビエントライト）
   material;         // マテリアル
-  torusGeometry;    // トーラスジオメトリ
-  torusArray;       // トーラスメッシュの配列 @@@
+  particlesGeometry;    // トーラスジオメトリ
   controls;         // オービットコントロール
   axesHelper;       // 軸ヘルパー
   isDown;           // キーの押下状態用フラグ
@@ -106,28 +105,57 @@ class ThreeApp {
     this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
 
     // 共通のジオメトリ、マテリアルから、複数のメッシュインスタンスを作成する @@@
-    const torusCount = 10;
-    const transformScale = 5.0;
-    this.torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 8, 16);
-    this.torusArray = [];
-    for (let i = 0; i < torusCount; ++i) {
-      // トーラスメッシュのインスタンスを生成
-      const torus = new THREE.Mesh(this.torusGeometry, this.material);
+    this.particlesGeometry = new THREE.BufferGeometry();
+    const count = 10000;
+    const colorArray = new Float32Array(count * 3);
+    const positionArray = new Float32Array(count * 3);
+    const velocityArray = new Float32Array(count);
+
+    for (let i = 0; i < count; ++i) {
       // 座標をランダムに散らす
-      torus.position.x = (Math.random() * 2.0 - 1.0) * transformScale;
-      torus.position.y = (Math.random() * 2.0 - 1.0) * transformScale;
-      torus.position.z = (Math.random() * 2.0 - 1.0) * transformScale;
-      // シーンに追加する
-      this.scene.add(torus);
-      // 配列に入れておく
-      this.torusArray.push(torus);
+      positionArray[i] = (Math.random() - 0.5) * 50;
+      positionArray[i + 1] = (Math.random() - 0.5) * 50;
+      positionArray[i + 2] = (Math.random() - 0.5) * 50;
+      colorArray[i] = Math.random();
+      colorArray[i + 1] = Math.random();
+      colorArray[i + 2] = Math.random();
+      velocityArray[i] = Math.random() * 0.02 + 0.01;
     }
 
+    //ジオメトリ
+    this.particlesGeometry.setAttribute(
+      "position",//この3というのはx,y,zの位置座標。
+      new THREE.BufferAttribute(positionArray, 3)
+    );
+
+    //カラー
+    this.particlesGeometry.setAttribute(
+      "color",//この3というのはx,y,zの位置座標。
+      new THREE.BufferAttribute(colorArray, 3)
+    );
+
+    this.particlesGeometry.setAttribute(
+      'velocity',
+      new THREE.BufferAttribute(velocityArray, 1)
+    );
+
+    //マテリアル
+    const PointsMaterial = new THREE.PointsMaterial({
+     //つぶつぶのサイズ
+      size: 0.08,
+      vertexColors: true, //カラーを有効にする
+      blending: THREE.AdditiveBlending, //加算合成 パーティクルが重なるところが光る。
+      transparent: true,
+    });
     // 軸ヘルパー
     const axesBarLength = 5.0;
     this.axesHelper = new THREE.AxesHelper(axesBarLength);
     this.scene.add(this.axesHelper);
 
+    //メッシュ化
+    //第一引数にはジオメトリ、第二引数にはマテリアル
+    const particles = new THREE.Points(this.particlesGeometry, PointsMaterial);
+    this.scene.add(particles);
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -135,20 +163,11 @@ class ThreeApp {
     this.render = this.render.bind(this);
 
     // キーの押下状態を保持するフラグ
-    this.isDown = false;
+    this.isstart = false;
 
-    // キーの押下や離す操作を検出できるようにする
-    window.addEventListener('keydown', (keyEvent) => {
-      switch (keyEvent.key) {
-        case ' ':
-          this.isDown = true;
-          break;
-        default:
-      }
-    }, false);
-    window.addEventListener('keyup', (keyEvent) => {
-      this.isDown = false;
-    }, false);
+    document.body.addEventListener('click', () => {
+      this.isstart = !this.isstart; // クリック時にフラグを切り替え
+    });
 
     // ウィンドウのリサイズを検出できるようにする
     window.addEventListener('resize', () => {
@@ -157,26 +176,33 @@ class ThreeApp {
       this.camera.updateProjectionMatrix();
     }, false);
   }
-
+  
   /**
    * 描画処理
    */
   render() {
-    // 恒常ループの設定
     requestAnimationFrame(this.render);
 
-    // コントロールを更新
-    this.controls.update();
+    const positionAttribute = this.particlesGeometry.getAttribute('position');
+    const velocityAttribute = this.particlesGeometry.getAttribute('velocity');
+    const posArray = positionAttribute.array;
+    const velArray = velocityAttribute.array;
 
-    // フラグに応じてオブジェクトの状態を変化させる
-    if (this.isDown === true) {
-      // Y 軸回転 @@@
-      this.torusArray.forEach((torus) => {
-        torus.rotation.y += 0.05;
-      });
+    for (let i = 0; i < posArray.length; i += 3) {
+      if (this.isstart) {
+        posArray[i + 2] += velArray[i / 3] * 10;
+      } else {
+        posArray[i + 2] += velArray[i / 3];
+      }
+
+      if (posArray[i + 2] > 50) {
+        posArray[i + 2] = -50;
+      }
     }
 
-    // レンダラーで描画
+    positionAttribute.needsUpdate = true;
+
+    this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
 }
