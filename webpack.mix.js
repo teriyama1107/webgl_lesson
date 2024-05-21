@@ -14,12 +14,7 @@ mix
     },
     devtool: "inline-source-map",
   })
-  .js('static-resources/js/script.js', 'public/assets/js')
-  .extract()
-  .sass('static-resources/sass/style.scss', 'public/assets/css/style.css')
-  .options({
-    processCssUrls: false
-  })
+  .js('static-resources/js/001_lesson/script.js', 'public/001_lesson/script.js')
   .sourceMaps(false, "inline-source-map")
   .webpWatched('static-resources/img', 'public/assets/img', {
     imageminWebpOptions: {

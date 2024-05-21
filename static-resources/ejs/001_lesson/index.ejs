@@ -1,20 +1,14 @@
-<%
-var dir = './../';
-var params = {};include(dir + 'includes/_data', {params: params});
-params.body_class = 'page--top';
-params.page_title = '';
-params.page_description = '';
-params.page_url = '';
-
-%>
-<%- include(dir + 'includes/_header', {params: params}) %>
-<%- include(dir + 'includes/_header_content', {params: params}) %>
-
-
-<main>
-  <div id="webgl"></div>
-</main>
-
-
-<%- include(dir + 'includes/_footer_content', {params: params}) %>
-<%- include(dir + 'includes/_footer', {params: params}) %>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <main>
+    <div id="webgl"></div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
